@@ -1,0 +1,171 @@
+// création des tables 
+
+    //regions 
+    CREATE TABLE IF NOT EXIST `regions`(
+    region_id integer  not null PRIMARY key,
+    region_name varchar (25),
+)
+
+    //Jobs
+CREATE TABLE IF NOT EXIST`jobs`(
+    job_id varchar (10) not null PRIMARY key,
+    job_title varchar (35) ,
+    min_salary integer,
+    max_salary integer
+)
+
+    //job_grades
+CREATE TABLE IF NOT EXIST `job_grades`(
+    grade_level varchar (2) not null PRIMARY key,
+    lowest_sal integer  ,
+    highest_sal integer
+)
+
+    //countries
+CREATE TABLE IF NOT EXIST `countries`(
+    country_id CHAR (2) not null PRIMARY key,
+    country_name varchar (40)  ,
+    region_id integer not null,
+    FOREIGN KEY (region_id)   REFERENCES regions(region_id) 
+)
+
+    //locations
+CREATE TABLE IF NOT EXIST `locations`(
+    location_id integer not null PRIMARY key,
+    street_address varchar (25)  ,
+    postal_code varchar (12),
+    city varchar (30),
+    state_province varchar (12),
+    country_id char (2) ,
+    FOREIGN KEY (country_id)   REFERENCES countries(country_id) 
+)
+
+    //departments
+CREATE TABLE IF NOT EXIST `departments`(
+    department_id integer not null PRIMARY key,
+    department_name varchar (30)  ,
+    manager_id integer ,
+    location_id integer ,
+    FOREIGN KEY (location_id)   REFERENCES locations(location_id) 
+)
+
+
+    //employees
+CREATE TABLE IF NOT EXIST `employees`(
+    employee_id integer not null PRIMARY key,
+    first_name varchar (20)  ,
+    last_name varchar (25)  ,
+    email varchar (25)  , 
+    phone_number varchar (20)  , 
+    hire_date date ,
+    job_id varchar (20)  ,
+    salary integer,
+    commission_pct integer,
+    manager_id integer ,
+    department_id integer ,
+    FOREIGN KEY (department_id)   REFERENCES departments(department_id) 
+)
+
+        //job_history
+CREATE TABLE IF NOT EXIST `job_history`(
+    employee_id integer not null ,
+    start_date date not null ,
+    end_date date,
+    job_id varchar (10) ,
+    department_id integer ,
+    PRIMARY key (employee_id, start_date),
+    FOREIGN KEY (employee_id) REFERENCES employees(employee_id),
+    FOREIGN KEY (job_id) REFERENCES jobs(job_id),
+    FOREIGN KEY (department_id) REFERENCES departments(department_id)
+)
+
+//Insertion des enregistrements en une seule requete 
+
+Inser into "Nom de la table" (title1, title 2) value ('exemple',''),('exemple2','')
+
+EXEMPLE : INSERT INTO regions (region_id,region_name) 
+          VALUE ('1', 'Europe\r'), ('2', 'Americas\r'), ('3', 'Asia\r'), ('4', 'Middle East and Africa\r')
+
+// une requête pour afficher les noms (prénom, nom) en utilisant les alias Prénom, Nom
+
+    select first_name AS prenom , last_name AS nom from employees
+
+//une requête pour obtenir l'ID unique du département à partir de la table des employés
+
+    SELECT DISTINCT department_id from employees
+
+// une requête pour obtenir tous les détails de l'employé à partir de la table des employés, par ordre de prénom, en ordre décroissant.
+
+    SELECT *  from employees ORDER BY first_name DESC
+
+//une requête pour obtenir les noms (prénom, nom), le salaire, la CP de tous les employés (la CP est calculée à 15 % du salaire)
+
+    SELECT first_name, last_name , salary , salary * 0.15 AS CP FROM `employees`
+
+//une requête pour obtenir l'ID de l'employé, les noms (prénom, nom), le salaire dans l'ordre croissant du salaire
+
+    SELECT employee_id, first_name, last_name, salary FROM `employees` ORDER BY salary ASC
+
+// une recherche pour obtenir le total des salaires payables aux salariés
+
+    SELECT SUM(salary) AS Total_salaries_to_pay FROM `employees`
+
+//une recherche pour obtenir le salaire moyen et le nombre de salariés dans le tableau des salariés
+
+    SELECT AVG(salary) AS Moyen_salary, COUNT(employee_id) AS Number_employees FROM `employees` 
+
+//une requête pour obtenir le nombre d'employés travaillant dans l'entreprise
+
+    SELECT COUNT(salary) FROM `employees`
+
+//une requête pour obtenir le nombre d'emplois disponibles dans le tableau des employés
+
+    SELECT  COUNT(DISTINCT job_id ) AS Nbr_Job FROM employees
+
+//une requête pour obtenir tous les prénoms du tableau des employés en majuscules
+
+    SELECT UPPER (first_name) AS prenom FROM `employees`
+
+//une requête pour obtenir les 3 premiers caractères du prénom dans la table des employés
+
+    SELECT SUBSTR(first_name, 1, 3) AS short FROM employees
+
+// une recherche pour obtenir le salaire maximum et minimum du tableau des employés
+
+    SELECT MAX(salary), MIN(salary) FROM `employees`
+
+//une requête pour afficher le nom (prénom, nom) et le salaire de tous les employés dont le salaire n'est pas compris entre 10 000 et 15 000 dollars
+
+    SELECT first_name, last_name, salary FROM `employees` WHERE salary NOT BETWEEN 10000 AND 15000
+
+//une requête pour afficher le nom (prénom, nom) et l'ID du département de tous les employés des départements 30 ou 100 par ordre croissant
+
+    SELECT first_name,last_name,department_id FROM `employees` WHERE department_id IN (30,100) ORDER BY department_id ASC
+
+//une requête pour afficher le nom (prénom, nom) et le salaire de tous les employés dont le salaire ne se situe pas dans la fourchette de 10 000 à 15 000 dollars et qui se trouvent dans le département 30 ou 100
+
+    SELECT first_name,last_name,department_id FROM `employees` WHERE department_id IN (30,100) ORDER BY department_id ASC
+
+//une requête pour afficher le nom (prénom, nom) et la date d'embauche pour tous les employés qui ont été embauchés en 1987
+
+    SELECT first_name,last_name, hire_date FROM `employees` WHERE hire_date LIKE '1987%'
+
+//une requête pour trouver le nom (prénom, nom) de tous les employés qui travaillent dans le département informatique
+
+    SELECT first_name,last_name,department_id FROM `employees` WHERE department_id IN (SELECT department_id FROM `departments` WHERE department_name LIKE 'IT%')
+
+//une requête pour trouver les adresses (ID_lieu, adresse_rue, ville, état_province, nom_pays) de tous les départements
+
+    SELECT departments.department_id, departments.department_name , locations.location_id , locations.street_address, locations.city, locations.state_province, countries.country_name FROM departments , locations, countries WHERE (departments.location_id = locations.location_id) AND (locations.country_id = countries.country_id)
+
+//une requête pour afficher le titre du poste et le salaire moyen des employés
+
+    SELECT jobs.job_title, AVG(employees.salary) AS Moyen_salary FROM employees, jobs WHERE employees.job_id = jobs.job_id GROUP BY job_title
+
+//une requête pour calculer l'âge en année
+
+    SELECT employee_id, (YEAR(CURRENT_DATE) - YEAR(hire_date)) AS years_of_work FROM employees
+
+//une requête pour mettre à jour la partie du numéro de téléphone dans la table des employés. Dans le numéro de téléphone, la sous-chaîne "124" sera remplacée par "999"
+
+    UPDATE employees SET phone_number = REPLACE ( phone_number, '124','999')
